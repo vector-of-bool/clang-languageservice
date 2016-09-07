@@ -1,0 +1,5 @@
+imports:
+    nlohmann-json: extern/nlohmann-json
+
+git module nlohmann-json:
+    url: https://github.com/nlohmann/json.git
