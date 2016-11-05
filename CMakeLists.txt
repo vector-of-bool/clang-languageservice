@@ -6,6 +6,15 @@ enable_testing()
 
 include_directories(extern)
 
+include(llvm.cmake)
+
+if(NOT TARGET clang::libclang)
+    message(WARNING "Cannot continue to build without libclang")
+    return()
+endif()
+
+add_subdirectory(extern/clangxx)
+
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED system thread)
 add_library(nlohmann::json INTERFACE IMPORTED)
