@@ -13,7 +13,7 @@ using nlohmann::json;
 
 template <typename StreamTransport> class httpish_transport {
     StreamTransport _streamer;
-    using handler_type = std::function<boost::future<json>(json)>;
+    using handler_type = std::function<boost::optional<boost::future<json>>(json)>;
     handler_type _handler;
 
 public:
@@ -65,7 +65,8 @@ private:
     }
 
     bool _step3_read_body(std::size_t content_length, std::stringstream& stream) {
-        while (stream.str().size() < content_length && _streamer.read(stream)) { /* NOOP */
+        while (stream.str().size() < content_length && _streamer.read(stream)) {
+            /* NOOP */
         }
         std::string buffer;
         buffer.resize(content_length);
@@ -80,7 +81,10 @@ private:
             return false;
         }
 
-        _handler(data).then([this](future<json> response) { send_message(response.get()); });
+        auto maybe_fut = _handler(data);
+        if (maybe_fut) {
+            maybe_fut->then([this](future<json> response) { send_message(response.get()); });
+        }
         return true;
     }
 

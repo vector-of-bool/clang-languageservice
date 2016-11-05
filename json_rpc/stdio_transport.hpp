@@ -56,7 +56,7 @@ public:
         auto data = str.data();
         while (remaining) {
             DWORD nwritten = 0;
-            ::WriteFile(output, data, remaining, &nwritten, nullptr);
+            ::WriteFile(output, data, static_cast<DWORD>(remaining), &nwritten, nullptr);
             remaining -= nwritten;
             data += nwritten;
         }

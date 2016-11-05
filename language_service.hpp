@@ -7,6 +7,10 @@
 
 #include "./initialize_params.hpp"
 
+#include <libclangxx/index.hpp>
+
+#include <boost/thread/future.hpp>
+
 namespace cls {
 
 using nlohmann::json;
@@ -92,6 +96,10 @@ public:
     void unknown_message(std::string method, json params) const {
         _log_message("Got an unknown message with method '", method, "'");
     }
+
+    void didOpenTextDocument(const langsrv::DidOpenTextDocumentParams&);
+    boost::optional<boost::future<json>> dispatchMethod(std::string method, json params);
+    boost::optional<boost::future<json>> _dispatchMethod(std::string method, json params);
 };
 }
 

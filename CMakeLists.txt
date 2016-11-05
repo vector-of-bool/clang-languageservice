@@ -22,9 +22,13 @@ set_property(TARGET nlohmann::json APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
 add_library(Boost::di INTERFACE IMPORTED)
 set_property(TARGET Boost::di APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/extern/boost-di/include")
 
-add_executable(${PROJECT_NAME} main.cpp json_rpc/windows_stdin_stream.cpp)
+add_executable(${PROJECT_NAME}
+    main.cpp
+    language_service.cpp
+    json_rpc/windows_stdin_stream.cpp
+    )
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_auto_type)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::thread Boost::system nlohmann::json Boost::disable_autolinking Boost::di)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::thread Boost::system nlohmann::json Boost::disable_autolinking Boost::di clang::libclang libclangxx)
 target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_THREAD_VERSION=4)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

@@ -10,6 +10,9 @@
 namespace langsrv {
 
 using boost::optional;
+using std::string;
+using std::vector;
+using nlohmann::json;
 
 struct ClientCapabilities {
     boost::optional<int> nothing;
@@ -17,14 +20,14 @@ struct ClientCapabilities {
 
 struct InitializeParams {
     int processId;
-    std::string rootPath;
-    optional<nlohmann::json> initializationOptions;
+    string rootPath;
+    optional<json> initializationOptions;
     ClientCapabilities capabilities;
 };
 
 struct CompletionOptions {
     bool resolveProvider;
-    std::vector<std::string> triggerChars;
+    vector<string> triggerChars;
 };
 
 struct SignatureHelpOptions {
@@ -55,9 +58,22 @@ struct ServerCapabilities {
 struct InitializeResult {
     langsrv::ServerCapabilities capabilities;
 };
+
+struct TextDocumentItem {
+    string uri;
+    string languageId;
+    int version;
+    string text;
+};
+
+
+struct DidOpenTextDocumentParams {
+    TextDocumentItem textDocument;
+};
+
 }
 
-                 // clang-format off
+// clang-format off
 MIRRORPP_REFLECT(langsrv::ClientCapabilities, (nothing));
 MIRRORPP_REFLECT(langsrv::InitializeParams,
                  (processId)(rootPath)(initializationOptions)(capabilities));
@@ -82,7 +98,14 @@ MIRRORPP_REFLECT(langsrv::ServerCapabilities,
                  (documentRangeFormatProvider)
                  (documentOnTypeFormattingProvider)
                  (renameProvider));
-                 // clang-format on
+MIRRORPP_REFLECT(langsrv::TextDocumentItem,
+                 (uri)
+                 (languageId)
+                 (version)
+                 (text));
+MIRRORPP_REFLECT(langsrv::DidOpenTextDocumentParams,
+                 (textDocument));
+// clang-format on
 
 
 #endif  // INITIALIZE_PARAMS_HPP_INCLUDED

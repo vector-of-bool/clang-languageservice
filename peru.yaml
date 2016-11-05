@@ -1,11 +1,5 @@
 imports:
     nlohmann-json: extern/nlohmann-json
-    boost-di: extern/boost-di
 
 git module nlohmann-json:
     url: https://github.com/nlohmann/json.git
-
-
-git module boost-di:
-    url: https://github.com/boost-experimental/di.git
-    rev: v1.0.1

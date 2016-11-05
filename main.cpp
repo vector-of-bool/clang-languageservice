@@ -44,21 +44,7 @@ int main(int, char**) {
     using std::string;
     cls::LanguageService service(server);
     server.run([&service, &server](std::string method, nlohmann::json params) {
-        if (method == "initialize") {
-            auto res = service.initialize(from_json<langsrv::InitializeParams>(params));
-            auto rj = to_json(res);
-
-            cls::ShowMessageRequestParams msg;
-            server.send_request("window/showMessageRequest", to_json(msg));
-
-            return boost::make_ready_future(rj);
-        }
-        if (method == "shutdown") {
-            service.shutdown();
-            return boost::make_ready_future(json{});
-        }
-        service.unknown_message(method, params);
-        return boost::make_ready_future(nlohmann::json());
+        return service.dispatchMethod(method, params);
     });
     outfile << "Stopping language server\n";
     return 0;

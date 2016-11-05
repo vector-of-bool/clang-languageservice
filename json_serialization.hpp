@@ -26,9 +26,9 @@ template <typename T> T from_json(const nlohmann::json& data) {
 }
 
 template <typename Type> struct json_serializer_helpers {
-    static Type load(nlohmann::json j) { return j.get<Type>(); }
-    static Type load(nlohmann::json j, std::string key) {
-        return from_json<Type>(k[key]);
+    static Type load(const nlohmann::json& j) { return j.get<Type>(); }
+    static Type load(const nlohmann::json& j, std::string key) {
+        return json_serializer<Type>::load(j[key]);
     }
 
     static nlohmann::json save(const Type& t) { return nlohmann::json(t); }
@@ -38,39 +38,14 @@ template <typename Type> struct json_serializer_helpers {
     }
 };
 
-template <typename Type>
-struct json_serializer<Type, std::enable_if_t<mirror::is_reflected<Type>::value>>
-    : json_serializer_helpers<Type> {
-
+template <>
+struct json_serializer<nlohmann::json, void> : json_serializer_helpers<nlohmann::json> {
     using json_serializer_helpers::save;
     using json_serializer_helpers::load;
 
-    // template <int NP1, int N = NP1-1>
-    // static Type load_nth(Type& out, nlohmann::json data, std::integral_constant<int, NP1>) {
-    //     using member = mirror::nth_member_of<Type, N>;
-    //     json_serializer<typename member::type>
-    // }
-    static Type load(nlohmann::json data) {
-        Type ret;
-        // load_nth(ret, data, std::integral_constant<int, mirror::reflect<Type>::size>{});
-        return ret;
-    }
-
-    static void save_nth(nlohmann::json&, const Type&, mirror::tail_member<Type>) {}
-
-    template <typename Member>
-    static void save_nth(nlohmann::json& ret, const Type& data, Member) {
-        // static_assert(mirror::is_reflected<typename Member::type>::value,
-        //               "Attribute type is not reflected");
-        json_serializer<typename Member::type>::save(ret, Member::name(), Member::ref(data));
-        save_nth(ret, data, Member::next{});
-    }
-
-    static nlohmann::json save(const Type& data) {
-        nlohmann::json ret;
-        save_nth(ret, data, mirror::reflect<Type>::first{});
-        return ret;
-    }
+    using json = nlohmann::json;
+    static json load(const json& j) { return j; }
+    static json save(const json& j) { return j; }
 };
 
 template <typename Type>
@@ -94,12 +69,26 @@ template <> struct json_serializer<std::string, void> : json_serializer_helpers<
 template <typename Type>
 struct json_serializer<boost::optional<Type>, void>
     : json_serializer_helpers<boost::optional<Type>> {
-    using json_serializer_helpers::save;
-    using json_serializer_helpers::load;
 
-    static boost::optional<Type> load(nlohmann::json data, std::string key) {
+    static boost::optional<Type> load(const nlohmann::json& data) {
+        if (data == nullptr) {
+            return boost::none;
+        } else {
+            return from_json<Type>(data);
+        }
+    }
+
+    static nlohmann::json save(const boost::optional<Type>& opt) {
+        if (opt) {
+            return to_json(*opt);
+        } else {
+            return json();
+        }
+    }
+
+    static boost::optional<Type> load(const nlohmann::json& data, std::string key) {
         auto found = data.find(key);
-        if (found != end(data)) {
+        if (found == end(data)) {
             return boost::none;
         }
         return load(*found);
@@ -109,6 +98,45 @@ struct json_serializer<boost::optional<Type>, void>
         if (o) {
             out[key] = to_json(*o);
         }
+    }
+};
+
+
+template <typename Type>
+struct json_serializer<Type, std::enable_if_t<mirror::is_reflected<Type>::value>>
+    : json_serializer_helpers<Type> {
+
+    using json_serializer_helpers::save;
+    using json_serializer_helpers::load;
+
+    static void load_nth(Type&, const nlohmann::json&, mirror::tail_member<Type>) {}
+
+    template <typename Member>
+    static void load_nth(Type& out, const nlohmann::json& data, Member) {
+        // member_type::debug_help;
+        Member::ref(out) = ::json_serializer<typename Member::type>::load(data, Member::name());
+        load_nth(out, data, typename Member::next{});
+    }
+    static Type load(const nlohmann::json& data) {
+        Type ret;
+        load_nth(ret, data, typename mirror::reflect<Type>::first{});
+        return ret;
+    }
+
+    static void save_nth(nlohmann::json&, const Type&, mirror::tail_member<Type>) {}
+
+    template <typename Member>
+    static void save_nth(nlohmann::json& ret, const Type& data, Member) {
+        // static_assert(mirror::is_reflected<typename Member::type>::value,
+        //               "Attribute type is not reflected");
+        json_serializer<typename Member::type>::save(ret, Member::name(), Member::ref(data));
+        save_nth(ret, data, Member::next{});
+    }
+
+    static nlohmann::json save(const Type& data) {
+        nlohmann::json ret;
+        save_nth(ret, data, mirror::reflect<Type>::first{});
+        return ret;
     }
 };
 
