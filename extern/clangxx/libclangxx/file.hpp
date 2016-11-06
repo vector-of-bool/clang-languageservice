@@ -25,12 +25,12 @@ public:
     {}
 
     /// Get the CXFile associated with the object
-    auto& file() const { return M_file; }
+    const CXFile& file() const { return M_file; }
     /// Get the filename associated with the file object
-    auto& filename() const { return M_filename; }
+    const string& filename() const { return M_filename; }
 
     /// Get the time_t associated with the file
-    auto time() const { return clang_getFileTime( M_file ); }
+    time_t time() const { return clang_getFileTime( M_file ); }
 
 private:
     /// The underlying CXFile object

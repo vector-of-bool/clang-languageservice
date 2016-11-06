@@ -2,11 +2,17 @@
 #define CLS_JSON_RPC_HTTPISH_TRANSPORT_HPP_INCLUDED
 
 #include <boost/asio.hpp>
+#include <boost/thread/future.hpp>
 
 #include <json.hpp>
 
+#include <mutex>
+
+static std::ofstream OUTPUT_STREAM{ "clang-languageservice.log" };
 
 namespace json_rpc {
+
+using boost::future;
 
 namespace asio = boost::asio;
 using nlohmann::json;

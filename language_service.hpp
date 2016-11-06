@@ -7,13 +7,15 @@
 
 #include "./initialize_params.hpp"
 
-#include <libclangxx/index.hpp>
-
 #include <boost/thread/future.hpp>
+
+#include <fstream>
 
 namespace cls {
 
 using nlohmann::json;
+
+static std::ofstream cls_log{ "cls-messages.log" };
 
 struct ShowMessageRequestParams {
     int type;
@@ -55,8 +57,9 @@ class LanguageService {
             std::stringstream strm;
             _build_string(strm, args...);
             ShowMessageRequestParams req;
-            req.type = 0;
+            req.type = 4;
             req.message = strm.str();
+            cls_log << strm.str() << std::endl;
             _server->send_notification("window/showMessage", to_json(req));
         }
     }
@@ -66,30 +69,21 @@ class LanguageService {
         if (_server) {
             std::stringstream strm;
             _build_string(strm, "[clang-languageservice] ", args...);
+            cls_log << strm.str() << std::endl;
+            std::cerr << strm.str() << std::endl;
             _server->send_notification("window/logMessage",
-                                       json{ { "type", 0 }, { "message", strm.str() } });
+                                       json{ { "type", 4 }, { "message", strm.str() } });
         }
     }
 
 public:
     template <typename ServerType>
     explicit LanguageService(ServerType& server)
-        : _server(new ErasedServerImpl<std::decay_t<ServerType>>(server)) {}
+        : _server(new ErasedServerImpl<ServerType>(server)) {}
     LanguageService(const LanguageService&) = delete;
     LanguageService& operator=(const LanguageService&) = delete;
 
-    langsrv::InitializeResult initialize(langsrv::InitializeParams params) {
-        langsrv::InitializeResult ret;
-        auto comp = langsrv::CompletionOptions{};
-        comp.resolveProvider = true;
-        comp.triggerChars = { ":", ".", ">" };
-        ret.capabilities.completionProvider = comp;
-        ret.capabilities.referencesProvider = true;
-        ret.capabilities.definitionProvider = true;
-        ret.capabilities.workspaceSymbolProvider = true;
-        _log_message("Initialized clang language server");
-        return ret;
-    }
+    langsrv::InitializeResult initialize(const langsrv::InitializeParams& params);
 
     void shutdown() {}
 

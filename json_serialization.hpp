@@ -50,8 +50,8 @@ struct json_serializer<nlohmann::json, void> : json_serializer_helpers<nlohmann:
 
 template <typename Type>
 struct json_serializer<std::vector<Type>, void> : json_serializer_helpers<std::vector<Type>> {
-    using json_serializer_helpers::save;
-    using json_serializer_helpers::load;
+    using json_serializer::json_serializer_helpers::save;
+    using json_serializer::json_serializer_helpers::load;
 
     static nlohmann::json save(const std::vector<Type>& items) {
         nlohmann::json ret;
@@ -82,7 +82,7 @@ struct json_serializer<boost::optional<Type>, void>
         if (opt) {
             return to_json(*opt);
         } else {
-            return json();
+            return nlohmann::json();
         }
     }
 
@@ -103,11 +103,11 @@ struct json_serializer<boost::optional<Type>, void>
 
 
 template <typename Type>
-struct json_serializer<Type, std::enable_if_t<mirror::is_reflected<Type>::value>>
+struct json_serializer<Type, typename std::enable_if<mirror::is_reflected<Type>::value>::type>
     : json_serializer_helpers<Type> {
 
-    using json_serializer_helpers::save;
-    using json_serializer_helpers::load;
+    using json_serializer::json_serializer_helpers::save;
+    using json_serializer::json_serializer_helpers::load;
 
     static void load_nth(Type&, const nlohmann::json&, mirror::tail_member<Type>) {}
 
@@ -130,12 +130,12 @@ struct json_serializer<Type, std::enable_if_t<mirror::is_reflected<Type>::value>
         // static_assert(mirror::is_reflected<typename Member::type>::value,
         //               "Attribute type is not reflected");
         json_serializer<typename Member::type>::save(ret, Member::name(), Member::ref(data));
-        save_nth(ret, data, Member::next{});
+        save_nth(ret, data, typename Member::next{});
     }
 
     static nlohmann::json save(const Type& data) {
         nlohmann::json ret;
-        save_nth(ret, data, mirror::reflect<Type>::first{});
+        save_nth(ret, data, typename mirror::reflect<Type>::first{});
         return ret;
     }
 };

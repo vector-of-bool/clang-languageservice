@@ -19,6 +19,42 @@
             "request": "attach",
             "program": "${workspaceRoot}/build/clang-languageservice.exe",
             "processId": "${command.pickProcess}"
+        },
+        {
+            "name": "C++ Launch (Linux/macOS)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/build/clang-languageservice",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true,
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "MIMode": "gdb"
+            }
+        },
+        {
+            "name": "C++ Attach (Linux/macOS)",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceRoot}/build/clang-languageservice",
+            "processId": "${command.pickProcess}",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "MIMode": "gdb"
+            }
         }
     ]
 }

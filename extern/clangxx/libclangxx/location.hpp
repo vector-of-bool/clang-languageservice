@@ -23,7 +23,7 @@ public:
     }
 
     /// Get the underlying CXSourceLocation owned by this object
-    auto handle() const { return M_location; }
+    CXSourceLocation handle() const { return M_location; }
 
     /// Format the location in a clang-ly way
     std::string format() const
@@ -38,13 +38,13 @@ public:
     }
 
     /// Get the CXFile that this location is contained in
-    auto file() const { return M_file; }
+    CXFile file() const { return M_file; }
     /// Get the location's line number
-    auto line() const { return M_line; }
+    unsigned line() const { return M_line; }
     /// Get the location's column number
-    auto col() const { return M_col; }
+    unsigned col() const { return M_col; }
     /// Get the location's offset into the file
-    auto offset() const { return M_offset; }
+    unsigned offset() const { return M_offset; }
 
     /// Returns true if the two locations are equivalent
     bool operator==( const Location& other ) const
@@ -87,7 +87,7 @@ public:
     }
 
     /// Returns the underlying CXRange
-    auto& range() const { return M_range; }
+    const CXSourceRange& range() const { return M_range; }
 
     /// Compare two ranges for equality
     bool operator==( const SourceRange& other ) const

@@ -2,12 +2,14 @@
 #define CLS_JSON_RPC_SERVER_HPP_INCLUDED
 
 #include <boost/asio.hpp>
+#include <boost/thread/future.hpp>
 
 #include <json.hpp>
 
 namespace json_rpc {
 
 using nlohmann::json;
+using boost::future;
 
 namespace asio = boost::asio;
 
@@ -27,17 +29,17 @@ public:
 
     template <typename Func> int run(Func&& fn) {
         _transporter.run(
-            [ this, fn = std::forward<Func>(fn) ](const json& data)
+            [ this, fn ](const json& data)
                 ->boost::optional<future<json>> {
                     if (!data.is_object()) {
                         OUTPUT_STREAM << "Invalid JSON, expected an object or array" << std::endl;
-                        return boost::make_exceptional(
+                        return boost::make_exceptional_future<json>(
                             std::invalid_argument("Invalid JSON, expected on object or array"));
                     }
                     auto method_json = data["method"];
                     if (!method_json.is_string()) {
                         OUTPUT_STREAM << "Invalid body: 'method' must be a string\n";
-                        return boost::make_exceptional(
+                        return boost::make_exceptional_future<json>(
                             std::invalid_argument("Invalid body: 'method' must be a string."));
                     }
                     auto method = method_json.operator std::string();
@@ -46,7 +48,7 @@ public:
 
                     auto maybe_fut = fn(method, params);
                     if (maybe_fut) {
-                        return maybe_fut->then([data](future<json> result) -> future<json> {
+                        return maybe_fut->then([data](future<json> result) -> json {
                             if (result.has_exception())
                                 std::terminate();
 
@@ -57,7 +59,7 @@ public:
                             }
                             ret["jsonrpc"] = "2.0";
                             ret["result"] = result.get();
-                            return boost::make_ready_future(ret);
+                            return ret;
                         });
                     }
                     return boost::none;

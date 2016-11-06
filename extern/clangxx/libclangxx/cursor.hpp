@@ -6,9 +6,12 @@
 #include <cstdint>
 
 #include <vector>
+#include <string>
 
 namespace clangxx
 {
+
+using std::string;
 
 /// The types of Source code LibClang is parsing
 enum SourceType
@@ -224,26 +227,26 @@ public:
     constexpr Cursor( CXCursor cursor ) : M_handle( cursor ) {}
 
     /// Returns the underlying CXCursor object
-    constexpr auto handle() const { return M_handle; }
+    constexpr CXCursor handle() const { return M_handle; }
 
     /// Returns the cursor's spelling. Don't confuse it with displayName()!
     /// @return std::string of the cursor's spelling
-    auto spelling() const
+    string spelling() const
     {
         return make_clang_string( clang_getCursorSpelling, handle() );
     }
 
     /// Returns the cursor's display name. Don't confuse it with spelling()!
     /// @return std::string of the cursor's display name
-    auto displayName() const
+    string displayName() const
     {
         return make_clang_string( clang_getCursorDisplayName, handle() );
     }
 
     /// Returns the CXCursorKind value for the underlying CXCursor
-    auto kind_cx() const { return clang_getCursorKind( handle() ); }
+    CXCursorKind kind_cx() const { return clang_getCursorKind( handle() ); }
     /// Returns the CXCursorKind, but as a Cursor::Kind value
-    auto kind() const { return Kind( kind_cx() ); }
+    Kind kind() const { return Kind( kind_cx() ); }
 
     /// Compares two cursors for equality using `clang_equalCursors`
     bool operator==( const Cursor& other ) const
@@ -289,14 +292,14 @@ public:
 
     /// Returns the Linkage for the cursor
     /// @return Linkage specifying the cursor's linkage
-    auto linkage() const
+    Linkage linkage() const
     {
         return Linkage( clang_getCursorLinkage( handle() ) );
     }
 
     /// Get the cursor's source language,
     /// @return SourceType with the cursors source language
-    auto language() const
+    SourceType language() const
     {
         return SourceType( clang_getCursorLanguage( handle() ) );
     }
@@ -306,7 +309,7 @@ public:
     /// @return A non-owning clangxx::TranslationUnit for the cursor's
     /// translation unit
     template <typename ResType = clangxx::TranslationUnit>
-    auto translationUnit() const
+    ResType translationUnit() const
     {
         return ResType::createNonOwning(
             clang_Cursor_getTranslationUnit( handle() ) );
@@ -328,7 +331,7 @@ public:
 
     /// Get the Availability of this cursor
     /// @return Availability specifying the cursor's availability
-    auto availability() const
+    Availablility availability() const
     {
         return Availablility( clang_getCursorAvailability( handle() ) );
     }
@@ -397,7 +400,7 @@ public:
 
     /// Returns a hash for this cursor
     /// @return An unsigned hash of the cursor
-    auto hash() const { return clang_hashCursor( handle() ); }
+    unsigned hash() const { return clang_hashCursor( handle() ); }
 
 private:
     /// The CXCursor that the Cursor represents. Default initialized to a null
@@ -410,6 +413,8 @@ private:
 class CursorGenerator
 {
 public:
+    using iterator = std::vector<Cursor>::const_iterator;
+    using const_iterator = std::vector<Cursor>::const_iterator;
     /// Initializes the generator to represent the children of the given cursor.
     explicit CursorGenerator( const Cursor& owner_ ) : owner{ owner_ }
     {
@@ -424,16 +429,16 @@ public:
     }
 
     /// Returns an iterator to the first child cursor
-    auto begin() const { return children.begin(); }
+    const_iterator begin() const { return children.begin(); }
     /// Returns an iterator past the last child cursor
-    auto end() const { return children.end(); }
+    const_iterator end() const { return children.end(); }
     /// Returns a const_iterator to the first child cursor
-    auto cbegin() const { return children.cbegin(); }
+    const_iterator cbegin() const { return children.cbegin(); }
     /// Returns a const_iterator past the last child cursor
-    auto cend() const { return children.cend(); }
+    const_iterator cend() const { return children.cend(); }
 
     /// Returns the number of children/cursor in the generator
-    auto size() const { return children.size(); }
+    std::size_t size() const { return children.size(); }
 
     /// The Cursor from which the generator was created
     Cursor owner;

@@ -39,7 +39,7 @@ public:
     /// on the provided object when it leaves scope
     /// @return A non-owning TranslationUnit instance representing the given
     /// CXTranslationUnit
-    static auto createNonOwning( CXTranslationUnit tu )
+    static TranslationUnit createNonOwning( CXTranslationUnit tu )
     {
         return TranslationUnit{ clangxx::nonowning, tu };
     }
@@ -58,7 +58,7 @@ public:
      * @see Index::parseSourceString
      * @see Index::createTranslationUnit
      */
-    static auto createFromSourceFile( CXIndex index, const char* path, int argc,
+    static TranslationUnit createFromSourceFile( CXIndex index, const char* path, int argc,
                                       const char** argv )
     {
         return TranslationUnit{ clang_createTranslationUnitFromSourceFile(
@@ -72,7 +72,7 @@ public:
      * @param path The path to the desired Clang AST dump
      * @return A TranslationUnit object created from the given AST dump
      */
-    static auto createFromASTFile( CXIndex index, const char* path )
+    static TranslationUnit createFromASTFile( CXIndex index, const char* path )
     {
         return TranslationUnit{ clang_createTranslationUnit( index, path ) };
     }
@@ -82,7 +82,7 @@ public:
      *  clang_defaultEditingTranslationUnitOptions
      * @return The result form `clang_defaultEditingTranslationUnitOptions`
      */
-    static auto defaultEditingOptions()
+    static std::size_t defaultEditingOptions()
     {
         return clang_defaultEditingTranslationUnitOptions();
     }
@@ -100,7 +100,7 @@ public:
      * clang_createTranslationUnitFromSourceFile
      * and clang_parseTranslationUnit
      */
-    static auto parseTranslationUnit( CXIndex index, const char* path, int argc,
+    static TranslationUnit parseTranslationUnit( CXIndex index, const char* path, int argc,
                                       const char* const* argv,
                                       unsigned options = 0 )
     {
@@ -120,7 +120,7 @@ public:
      * @todo Verify that this works as expected. It seems like a strange way to
      * do things.
      */
-    static auto createFromSourceString( CXIndex index,
+    static TranslationUnit createFromSourceString( CXIndex index,
                                         const std::string& source, int argc,
                                         const char** argv,
                                         SourceType type = CXX )
@@ -148,7 +148,7 @@ public:
      * @param argv The command-line arguments that will be sent to Clang
      * @return A TranslationUnit object from the input command-line arguments
      */
-    static auto createFromArgs( CXIndex index, int argc,
+    static TranslationUnit createFromArgs( CXIndex index, int argc,
                                 const char* const* argv )
     {
         return TranslationUnit{ clang_createTranslationUnitFromSourceFile(
@@ -159,18 +159,18 @@ public:
      * @brief Returns the source file name
      * @return a std::string representing the translation unit's filename
      */
-    auto spelling() const
+    string spelling() const
     {
         throwIfInvalid( "Cannot get spelling of null TranslationUnit" );
         return make_clang_string( clang_getTranslationUnitSpelling, ptr() );
     }
 
     /// Alias of spelling()
-    auto filename() const { return spelling(); }
+    string filename() const { return spelling(); }
 
     /// Returns the resultl from clang_defaultSaveOptions for this translation
     /// unit
-    auto defaultSaveOptions() const
+    std::size_t defaultSaveOptions() const
     {
         throwIfInvalid( "Cannot get save options of null TranslationUnit" );
         return clang_defaultSaveOptions( ptr() );
@@ -190,7 +190,7 @@ public:
 
     /// Returns the results from clang_defaultReparseOptions for this
     /// translation unit
-    auto defaultReparseOptions() const
+    std::size_t defaultReparseOptions() const
     {
         throwIfInvalid( "Cannot get reparse options of null TranslationUnit" );
         return clang_defaultReparseOptions( ptr() );
@@ -202,7 +202,7 @@ public:
      * @param options The options to use while parsing. Default is zero
      * @return An integer representing the result of the reparsing
      */
-    auto reparse( const std::vector<UnsavedFile>& files, unsigned options = 0 )
+    std::size_t reparse( const std::vector<UnsavedFile>& files, unsigned options = 0 )
         const
     {
         throwIfInvalid( "Cannot reparse null translation unit!" );
@@ -464,7 +464,7 @@ struct Diagnostic
     };
 
     /// Return the underlying CXDiagnostic object
-    auto ptr() const { return M_ptr.get(); }
+    CXDiagnostic ptr() const { return M_ptr.get(); }
 
     /// Replaces this diagnostic with the provided one
     explicit Diagnostic( CXDiagnostic diag ) { assign( diag ); }
@@ -612,7 +612,7 @@ struct DiagnosticSet
     DiagnosticSet( CXDiagnosticSet ptr ) : M_ptr{ ptr } {}
 
     /// Returns the underlying CXDiagnostic object
-    auto ptr() const { return M_ptr.get(); }
+    CXDiagnostic ptr() const { return M_ptr.get(); }
 
     /// Models a RandomAccessIterator that can be used to iterate over the items
     /// in a DiagnosticSet
@@ -633,27 +633,27 @@ struct DiagnosticSet
         }
 
         /// Advance the iterator
-        auto& operator++()
+        iterator& operator++()
         {
             ++index;
             return *this;
         }
 
         /// Recedes the iterator
-        auto& operator--()
+        iterator& operator--()
         {
             --index;
             return *this;
         }
 
         /// Returns a new iterator at the provided offset from this one
-        auto operator+( int off ) const
+        iterator operator+( int off ) const
         {
             return iterator( owner, index + off );
         }
 
         /// Returns a new iterator at the provided offset from this one
-        auto operator-( int off ) const
+        iterator operator-( int off ) const
         {
             return iterator( owner, index - off );
         }
@@ -732,27 +732,27 @@ struct DiagnosticGenerator
         }
 
         /// Advance the iterator
-        auto& operator++()
+        iterator& operator++()
         {
             ++index;
             return *this;
         }
 
         /// Regress the generator
-        auto& operator--()
+        iterator& operator--()
         {
             --index;
             return *this;
         }
 
         /// Returns a new iterator at the provided offset from the iterator
-        auto operator+( int off ) const
+        iterator operator+( int off ) const
         {
             return iterator( generator, index + off );
         }
 
         /// Returns a new iterator at the provided offset from the given one
-        auto operator-( int off ) const
+        iterator operator-( int off ) const
         {
             return iterator( generator, index - off );
         }

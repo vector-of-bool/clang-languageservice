@@ -37,14 +37,14 @@ public:
 
     /// Get a non-const reference to the underlying CXUnsavedFile. I'm
     /// trusting you here!
-    auto& handle() { return M_handle; }
+    CXUnsavedFile& handle() { return M_handle; }
     /// Get a const reference to the underlying CXUnsavedFile
-    auto& handle() const { return M_handle; }
+    const CXUnsavedFile& handle() const { return M_handle; }
 
     /// Get the filename for the unsaved file
-    auto& filename() const { return M_fname; }
+    const string& filename() const { return M_fname; }
     /// Get the source code for the unsaved file
-    auto& source() const { return M_str; }
+    const string& source() const { return M_str; }
 
     UnsavedFile( const UnsavedFile& other ) :
         M_str{ other.source() },

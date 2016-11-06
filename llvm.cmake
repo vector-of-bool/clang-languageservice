@@ -23,24 +23,36 @@ ExternalProject_Add(
             "-DTMP_DIR=<TMP_DIR>"
             -P "${CMAKE_CURRENT_LIST_DIR}/download-clang.cmake"
     CMAKE_ARGS
+        -DENABLE_SHARED=FALSE
+        -DBUILD_SHARED=FALSE
         -DLLVM_TARGETS_TO_BUILD:string=
         -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_LIST_DIR}/extern/llvm
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target clangTooling --config $<CONFIG>
-    INSTALL_DIR "${CMAKE_CURRENT_LIST_DIR}/extern/llvm"
+    INSTALL_COMMAND ${NULL_COMMAND}
     # Make Ninja show output:
     USES_TERMINAL_DOWNLOAD 1
     USES_TERMINAL_PATCH 1
     USES_TERMINAL_CONFIGURE 1
     USES_TERMINAL_BUILD 1
+    USES_TERMINAL_INSTALL 1
 )
 
 list(INSERT CMAKE_PREFIX_PATH 0 "${CMAKE_CURRENT_LIST_DIR}/extern/llvm")
-find_package(LLVM 3.9 REQUIRED)
-find_package(Clang REQUIRED)
-if(NOT TARGET libclang)
-    message(WARNING "Failed to find libclang. You probably don't have it installed properly. Build the 'LLVM' target and reconfigure.")
+list(INSERT CMAKE_PREFIX_PATH 0 "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM-build")
+find_package(LLVM 3.9)
+if(LLVM_FOUND)
+    find_package(Clang)
+endif()
+
+if(NOT TARGET clangTooling OR NOT LLVM_FOUND)
+    message(WARNING "Failed to find LibTooling. You probably don't have it installed properly. Build the 'LLVM' target and reconfigure.")
 else()
-    add_library(clang::libclang INTERFACE IMPORTED)
-    set_property(TARGET clang::libclang APPEND PROPERTY INTERFACE_LINK_LIBRARIES libclang)
-    set_property(TARGET clang::libclang APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${LLVM_DIR}/../../../include")
+    add_library(clang::libTooling INTERFACE IMPORTED)
+    set_property(TARGET clang::libTooling APPEND PROPERTY INTERFACE_LINK_LIBRARIES clangTooling)
+    set_property(TARGET clang::libTooling
+        APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+            "${LLVM_DIR}/../../../include"
+            "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/include"
+            "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/tools/clang/include"
+        )
 endif()

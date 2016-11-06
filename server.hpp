@@ -53,7 +53,7 @@ class server
     static server create(Args &&... args)
     {
         using io_system_impl = io_system<IO>;
-        return server(std::make_unique<io_system_impl>(io_system_impl::create(std::forward<Args>(args)...)));
+        return server(std::unique_ptr<io_system_impl>(new io_system_impl(io_system_impl::create(std::forward<Args>(args)...))));
     }
 
     void run()

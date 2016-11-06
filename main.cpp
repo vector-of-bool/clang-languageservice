@@ -11,8 +11,6 @@
 #include <boost/uuid/uuid_io.hpp>
 
 
-#define OUTPUT_STREAM outfile
-
 #include <json.hpp>
 
 #include "json_rpc/httpish_transport.hpp"
@@ -29,12 +27,7 @@
 #include "./language_service.hpp"
 #include "server.hpp"
 
-
-std::ofstream outfile{ "server.log" };
-
 int main(int, char**) {
-    outfile << "Language server has started\n";
-
     // auto server = clang_languageservice::server::create<stdio_iosystem>();
     // server.run();
 
@@ -46,6 +39,5 @@ int main(int, char**) {
     server.run([&service, &server](std::string method, nlohmann::json params) {
         return service.dispatchMethod(method, params);
     });
-    outfile << "Stopping language server\n";
     return 0;
 }
