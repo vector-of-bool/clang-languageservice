@@ -80,6 +80,7 @@ public:
         stdout_log.write(str.data(), str.size());
         stdout_log.flush();
         std::cout.write(str.data(), str.size());
+        std::cout.flush();
         #endif
     }
 };
