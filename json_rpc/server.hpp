@@ -4,6 +4,9 @@
 #include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
 
+#include <functional>
+#include <string>
+
 #include <json.hpp>
 
 namespace json_rpc {
@@ -85,6 +88,9 @@ public:
         _transporter.send_message(msg);
     }
 };
+
+using method_handler = std::function<boost::future<json>(const std::string&, const json&)>;
+
 }
 
 #endif  // CLS_JSON_RPC_SERVER_HPP_INCLUDED

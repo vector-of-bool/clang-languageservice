@@ -5,7 +5,8 @@
 
 #include <json.hpp>
 
-#include "./initialize_params.hpp"
+#include "protocol.hpp"
+#include "serialize.hpp"
 
 #include <boost/thread/future.hpp>
 
@@ -14,6 +15,9 @@
 namespace cls {
 
 using nlohmann::json;
+
+using langsrv::to_json;
+using langsrv::from_json;
 
 static std::ofstream cls_log{ "cls-messages.log" };
 

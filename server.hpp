@@ -8,7 +8,7 @@
 
 #include "json_rpc.hpp"
 
-namespace clang_languageservice
+namespace c_literal_string
 {
 
 class server

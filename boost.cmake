@@ -39,6 +39,12 @@ if(Boost_FOUND)
     if(TARGET Boost::thread AND TARGET Boost::system)
         set(have_boost YES)
     else()
+        if(NOT TARGET Boost::boost)
+            add_library(Boost::boost INTERFACE IMPORTED)
+            set_target_properties(Boost::boost PROPERTIES
+                INTERFACE_INCLUDE_DIRECTORIES "${boost_extern_dir}/include"
+                )
+        endif()
         set(got_threadlib NO)
         get_filename_component(threadlib "${boost_extern_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}boost_thread${CMAKE_STATIC_LIBRARY_SUFFIX}" ABSOLUTE)
         message(STATUS "Searching for in-source Boost.Thread library ${threadlib}")
@@ -46,7 +52,7 @@ if(Boost_FOUND)
             add_library(Boost::thread STATIC IMPORTED)
             set_target_properties(Boost::thread PROPERTIES
                 IMPORTED_LOCATION "${threadlib}"
-                INTERFACE_INCLUDE_DIRECTORIES "${boost_extern_dir}/include"
+                INTERFACE_LINK_LIBRARIES Boost::boost
                 )
             set(got_threadlib YES)
         endif()
@@ -56,7 +62,7 @@ if(Boost_FOUND)
             add_library(Boost::system STATIC IMPORTED)
             set_target_properties(Boost::system PROPERTIES
                 IMPORTED_LOCATION "${syslib}"
-                INTERFACE_INCLUDE_DIRECTORIES "${boost_extern_dir}/include"
+                INTERFACE_LINK_LIBRARIES Boost::boost
                 )
             set(got_syslib YES)
         endif()

@@ -13,18 +13,19 @@
 
 #include <json.hpp>
 
-#include "json_rpc/httpish_transport.hpp"
-#include "json_rpc/server.hpp"
-#include "json_rpc/stdio_transport.hpp"
+#include <json_rpc/httpish_transport.hpp>
+#include <json_rpc/server.hpp>
+#include <json_rpc/stdio_transport.hpp>
 
 
 #ifndef _WIN32
 #include <unistd.h>
 #endif
 
-#include "json_rpc/stream_transport.hpp"
+#include <json_rpc/stream_transport.hpp>
 
-#include "./language_service.hpp"
+#include <langsrv/language_service.hpp>
+
 #include "server.hpp"
 
 int main(int, char**) {
