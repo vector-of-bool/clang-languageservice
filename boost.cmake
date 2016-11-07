@@ -10,12 +10,21 @@ ExternalProject_Add(Boost
     URL_HASH SHA256=36c96b0f6155c98404091d8ceb48319a28279ca0333fba1ad8611eb90afb2ca0
     CONFIGURE_COMMAND
         ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>
+        ${CMAKE_COMMAND} -E env
+            CXX=${CMAKE_CXX_COMPILER}
+            CC=${CMAKE_C_COMPILER}
         <SOURCE_DIR>/bootstrap.sh --prefix=<INSTALL_DIR> --with-libraries=system,thread
     BUILD_COMMAND
         ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>
+        ${CMAKE_COMMAND} -E env
+            CXX=${CMAKE_CXX_COMPILER}
+            CC=${CMAKE_C_COMPILER}
         <SOURCE_DIR>/b2 -j4
     INSTALL_COMMAND
         ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>
+        ${CMAKE_COMMAND} -E env
+            CXX=${CMAKE_CXX_COMPILER}
+            CC=${CMAKE_C_COMPILER}
         <SOURCE_DIR>/b2 install headers
     INSTALL_DIR "${boost_extern_dir}"
     # Make Ninja show output:
