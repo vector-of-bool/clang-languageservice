@@ -1,0 +1,115 @@
+namespace langsrv
+
+    interface Position
+        int line
+        # Represents the column of the character
+        int character
+
+    interface Range
+        Position start
+        Position end
+
+    interface Location
+        string uri
+        Range range
+
+    interface Diagnostic
+        Range range
+        optional<int> severity
+        optional<string> code
+        optional<string> source
+        string message
+
+    interface Command
+        string title
+        string command
+        vector<string> arguments
+
+    interface TextEdit
+        Range range
+        string newText
+
+    interface WorkspaceEdit
+        map<string, vector<TextEdit>> changes
+
+    interface TextDocumentIdentifier
+        string uri
+
+    interface TextDocumentItem
+        string uri
+        string languageId
+        int version
+        string text
+
+    interface VersionedTextDocumentIdentifier
+        string uri
+        int version
+
+    interface TextDocumentPositionParams
+        TextDocumentIdentifier textDocument
+        Position position
+
+    interface ClientCapabilities
+        optional<int> nothing
+
+    interface InitializeParams
+        int processId
+        string rootPath
+        optional<json> initializationOptions
+        ClientCapabilities capabilities
+
+    interface CompletionOptions
+        bool resolveProvider
+        vector<string> triggerChars
+
+    interface DocumentOnTypeFormattingOptions
+        int nothing
+
+    interface SignatureHelpOptions
+        vector<string> triggerChars
+
+    interface ServerCapabilities
+        optional<int> textDocumentSync
+        optional<bool> hoverProvider
+        optional<CompletionOptions> completionProvider
+        optional<SignatureHelpOptions> signatureHelpOptions
+        optional<bool> definitionProvider
+        optional<bool> referencesProvider
+        optional<bool> documentHighlightProvider
+        optional<bool> workspaceSymbolProvider
+        optional<bool> codeActionsProvider
+        optional<bool> codeLensProvider
+        optional<bool> documentFormattingProvider
+        optional<bool> documentRangeFormatProvider
+        optional<DocumentOnTypeFormattingOptions> documentOnTypeFormattingOptions
+        optional<bool> renameProvider
+
+    interface InitializeResult
+        ServerCapabilities capabilities
+
+    interface DidOpenTextDocumentParams
+        TextDocumentItem textDocument
+
+    interface ShowMessageRequestParams
+        int type
+        string message
+
+    interface LogMessageParams
+        int type
+        string message
+
+# The types below are not part of the language server spec, but are used for the
+# clang-languageservice
+
+namespace cls
+
+    interface GetCompilationInfoParams
+        string uri
+
+    interface CompilationInfo
+        string file
+        string command
+        string directory
+
+    interface GetCompilationInfoResult
+        optional<CompilationInfo> compilationInfo

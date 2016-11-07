@@ -46,13 +46,7 @@ target_include_directories(jsonrpc INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_L
 target_link_libraries(jsonrpc INTERFACE nlohmann::json Boost::boost mirror::mirror)
 target_compile_definitions(jsonrpc INTERFACE BOOST_THREAD_VERSION=4)
 
-add_library(langsrv STATIC
-    langsrv/language_service.hpp
-    langsrv/language_service.cpp
-    langsrv/protocol.hpp
-    langsrv/serialize.hpp
-    )
-target_link_libraries(langsrv PUBLIC jsonrpc)
+add_subdirectory(langsrv)
 
 add_executable(${PROJECT_NAME}
     main.cpp

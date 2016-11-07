@@ -6,9 +6,9 @@
 
 #include <boost/thread/future.hpp>
 
-#include "json_rpc.hpp"
+#include <json_rpc/server.hpp>
 
-namespace c_literal_string
+namespace cls
 {
 
 class server

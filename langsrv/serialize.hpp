@@ -42,7 +42,6 @@ template <> struct serializer<json, void> : serializer_helpers<json> {
     using serializer_helpers::save;
     using serializer_helpers::load;
 
-    using json = json;
     static json load(const json& j) { return j; }
     static json save(const json& j) { return j; }
 };

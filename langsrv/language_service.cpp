@@ -1,9 +1,16 @@
 #include "language_service.hpp"
 
+#include "types.hpp"
+
+#include "opt_bind.hpp"
+
 #include <mirror/mirror.hpp>
+
+#include <algorithm>
 
 using namespace cls;
 using namespace langsrv;
+using namespace langsrv::optional_bind_op;
 
 using nlohmann::json;
 using std::string;
@@ -12,7 +19,27 @@ using boost::make_ready_future;
 using boost::none;
 
 void LanguageService::didOpenTextDocument(const langsrv::DidOpenTextDocumentParams& p) {
-    _log_message("Opened text document ", to_json(p));
+    langsrv::TextDocumentItem doc = p.textDocument;
+    getCompilationInfo(GetCompilationInfoParams{ doc.uri })
+        .then([=](future<GetCompilationInfoResult> fci) {
+            auto res = fci.get();
+            res.compilationInfo | [=](CompilationInfo info) {
+                _log_message("Got compilation info for file '", doc.uri, "'");
+                _log_message("Compile command for '", doc.uri, "' is: ", info.command);
+            };
+        })
+        .then([this](future<void> f) {
+            try {
+                f.get();
+            } catch (const std::exception& e) {
+                _log_message("There was an unhandle error: ", e.what());
+            }
+        });
+}
+
+future<GetCompilationInfoResult>
+LanguageService::getCompilationInfo(GetCompilationInfoParams param) {
+    return _sendRequest<GetCompilationInfoResult>("vob/cls/getCompilationInfo", param);
 }
 
 InitializeResult LanguageService::initialize(const InitializeParams& params) {

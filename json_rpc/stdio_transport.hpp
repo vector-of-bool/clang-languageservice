@@ -59,7 +59,9 @@ public:
             return false;
 
         stdin_log.write(buffer, nread);
+        stdin_log.flush();
         out.write(buffer, nread);
+        out.flush();
         return true;
     }
 
