@@ -52,7 +52,7 @@ else()
     set_property(TARGET clang::libTooling
         APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
             "${LLVM_DIR}/../../../include"
-            "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/include"
-            "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/tools/clang/include"
+            # "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/include"
+            # "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/tools/clang/include"
         )
 endif()
