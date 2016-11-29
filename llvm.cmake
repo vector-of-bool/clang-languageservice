@@ -80,5 +80,7 @@ else()
             "${llvm_extern}/include"
             # "${llvm_extern}/tools/clang/include"
             "${LLVM_DIR}/../../../include"
+            # "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/include"
+            # "${CMAKE_CURRENT_BINARY_DIR}/LLVM-prefix/src/LLVM/tools/clang/include"
         )
 endif()
