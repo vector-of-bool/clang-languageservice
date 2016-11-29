@@ -17,7 +17,7 @@ template <typename Result> struct bind_helper {
 
     template <typename T, typename Func> static type bind(optional<T> opt, Func&& fn) {
         if (opt) {
-            std::forward<Func>(fn)(std::move(*opt));
+            return std::forward<Func>(fn)(std::move(*opt));
         } else {
             return none;
         }
@@ -29,7 +29,7 @@ template <> struct bind_helper<void> {
 
     template <typename T, typename Func> static type bind(optional<T> opt, Func&& fn) {
         if (opt) {
-            std::forward<Func>(fn)(std::move(*opt));
+            return std::forward<Func>(fn)(std::move(*opt));
         }
     }
 };
@@ -57,7 +57,7 @@ using bind_helper_t = bind_helper<decltype(std::declval<Func>()(std::declval<T>(
 
 template <typename T, typename Func>
 auto operator|(optional<T> opt, Func&& fn) -> typename detail::bind_helper_t<Func, T>::type {
-    return detail::bind_helper_t<Func, T>::bind(opt, fn);
+    return detail::bind_helper_t<Func, T>::bind(std::move(opt), std::forward<Func>(fn));
 }
 
 } // optional_bind_op

@@ -254,6 +254,18 @@ MIRRORPP_REFLECT(langsrv::LogMessageParams,
                 (message)
                 );
 
+namespace langsrv { struct RenameParams {
+    TextDocumentIdentifier textDocument;
+    Position position;
+    string newName;
+}; }
+
+MIRRORPP_REFLECT(langsrv::RenameParams,
+                (textDocument)
+                (position)
+                (newName)
+                );
+
 namespace cls {
    using std::string;
    using std::vector;
@@ -288,6 +300,16 @@ namespace cls { struct GetCompilationInfoResult {
 
 MIRRORPP_REFLECT(cls::GetCompilationInfoResult,
                 (compilationInfo)
+                );
+
+namespace cls { struct GetCompilationDatabasePathResult {
+    optional<string> filepath;
+    optional<string> directory;
+}; }
+
+MIRRORPP_REFLECT(cls::GetCompilationDatabasePathResult,
+                (filepath)
+                (directory)
                 );
 
 

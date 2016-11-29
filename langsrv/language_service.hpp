@@ -1,16 +1,16 @@
 #ifndef LANGUAGE_SERVICE_HPP_INCLUDED
 #define LANGUAGE_SERVICE_HPP_INCLUDED
 
-#include <sstream>
+#include "protocol_types.hpp"
+
+#include <json_rpc/serialize.hpp>
 
 #include <json.hpp>
-
-#include "protocol_types.hpp"
-#include "serialize.hpp"
 
 #include <boost/thread/future.hpp>
 
 #include <fstream>
+#include <sstream>
 
 namespace cls {
 
@@ -18,8 +18,8 @@ using nlohmann::json;
 using boost::future;
 using boost::optional;
 
-using langsrv::to_json;
-using langsrv::from_json;
+using json_rpc::to_json;
+using json_rpc::from_json;
 
 static std::ofstream cls_log{ "cls-messages.log" };
 }
@@ -29,8 +29,7 @@ namespace cls {
 class LanguageService {
     struct ErasedServer {
         virtual ~ErasedServer() = default;
-        virtual future<json> sendRequest(const std::string& method, const json& params)
-            = 0;
+        virtual future<json> sendRequest(const std::string& method, const json& params) = 0;
         virtual void sendNotification(const std::string& name, const json& params) = 0;
         template <typename T>
         typename std::enable_if<!std::is_same<T, json>::value, future<json>>::type
@@ -66,12 +65,13 @@ class LanguageService {
         _build_string(strm, args...);
     }
 
-    template <typename... Args> void _show_message(const Args&... args) const {
+    template <typename... Args>
+    void _show_message(langsrv::MessageType type, const Args&... args) const {
         if (_server) {
             std::stringstream strm;
             _build_string(strm, args...);
             langsrv::ShowMessageRequestParams req;
-            req.type = 4;
+            req.type = static_cast<int>(type);
             req.message = strm.str();
             cls_log << strm.str() << std::endl;
             _server->sendNotification("window/showMessage", req);
@@ -107,8 +107,10 @@ public:
     LanguageService& operator=(const LanguageService&) = delete;
 
     future<GetCompilationInfoResult> getCompilationInfo(GetCompilationInfoParams param);
+    future<GetCompilationDatabasePathResult> getCompilationDatabasePath();
 
     langsrv::InitializeResult initialize(const langsrv::InitializeParams& params);
+    future<langsrv::WorkspaceEdit> rename(const langsrv::RenameParams& params);
 
     void shutdown() {}
 

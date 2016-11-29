@@ -1,27 +1,48 @@
-#ifndef LANGSRV_SERIALIZE_HPP_INCLUDED
-#define LANGSRV_SERIALIZE_HPP_INCLUDED
+#ifndef JSON_RPC_SERIALIZE_HPP_INCLUDED
+#define JSON_RPC_SERIALIZE_HPP_INCLUDED
 
 #include <mirror/mirror.hpp>
 
 #include <json.hpp>
 
 #include <boost/optional.hpp>
+#include <boost/thread/future.hpp>
 
 #include <string>
+#include <map>
 #include <vector>
 
-namespace langsrv {
+namespace json_rpc {
 
 using nlohmann::json;
 using std::string;
 using std::vector;
+using std::map;
 using boost::optional;
 
+template <typename T>
+json to_json(const T&);
+
+template <typename T>
+T from_json(const json&);
+
+template <typename Result>
+boost::future<json> convert_result(boost::future<Result> fut) {
+    return fut.then([](boost::future<Result> f) {
+        try {
+            auto res = f.get();
+            return to_json(res);
+        } catch (const std::exception& e) {
+            return json{ { "code", -1 }, { "message", e.what() } };
+        }
+    });
+}
+
 #define DECLARE_JSON_SERIALIZE(Type, Name)                                                        \
-    ::langsrv::serializer<Type>::save(out_json, #Name, data.Name);
+    ::json_rpc::serializer<Type>::save(out_json, #Name, data.Name);
 
 #define DECLARE_JSON_DESERIALIZE(Type, Name)                                                      \
-    ret.Name = ::langsrv::serializer<Type>::load(json_data, #Name);
+    ret.Name = ::json_rpc::serializer<Type>::load(json_data, #Name);
 
 template <typename Type, typename = void> struct serializer;
 
@@ -54,6 +75,28 @@ template <typename Type> struct serializer<vector<Type>, void> : serializer_help
         json ret;
         for (auto&& item : items) {
             ret.push_back(to_json(item));
+        }
+        return ret;
+    }
+};
+
+template <typename ValueType>
+struct serializer<map<string, ValueType>, void> : serializer_helpers<map<string, ValueType>> {
+    using serializer::serializer_helpers::save;
+    using serializer::serializer_helpers::load;
+
+    static json save(const map<string, ValueType>& data) {
+        auto ret = json::object();
+        for (const auto& pair : data) {
+            ret[pair.first] = to_json(pair.second);
+        }
+        return ret;
+    }
+
+    static map<string, ValueType> load(const json& data) {
+        map<string, ValueType> ret;
+        for (auto it = data.begin(); it != data.end(); ++it) {
+            ret.emplace(it.key(), from_json<ValueType>(it.value()));
         }
         return ret;
     }
@@ -135,4 +178,4 @@ struct serializer<Type, typename std::enable_if<mirror::is_reflected<Type>::valu
 };
 }
 
-#endif  // LANGSRV_SERIALIZE_HPP_INCLUDED
+#endif  // JSON_RPC_SERIALIZE_HPP_INCLUDED

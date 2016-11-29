@@ -98,6 +98,11 @@ namespace langsrv
         int type
         string message
 
+    interface RenameParams
+        TextDocumentIdentifier textDocument
+        Position position
+        string newName
+
 # The types below are not part of the language server spec, but are used for the
 # clang-languageservice
 
@@ -113,3 +118,7 @@ namespace cls
 
     interface GetCompilationInfoResult
         optional<CompilationInfo> compilationInfo
+
+    interface GetCompilationDatabasePathResult
+        optional<string> filepath
+        optional<string> directory

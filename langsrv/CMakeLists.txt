@@ -94,6 +94,10 @@ add_library(langsrv STATIC
     language_service.hpp
     language_service.cpp
     protocol_types.hpp
-    serialize.hpp
+
+    compilation_database.hpp
+
+    # Individual methods
+    cls_rename.cpp
     )
-target_link_libraries(langsrv PUBLIC jsonrpc)
+target_link_libraries(langsrv PUBLIC jsonrpc clang::libTooling)
